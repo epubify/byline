@@ -17,8 +17,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "byline"
   gem.homepage = "http://github.com/epubify/byline"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Store user info in Amazon SimpleDB}
+  gem.description = %Q{Bio and photo is fetched from gravatar.com}
   gem.email = "rune@epubify.com"
   gem.authors = ["Rune Myrland"]
   # dependencies defined in Gemfile
