@@ -1,0 +1,82 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'app'))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..'))
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+
+require "models/gravatar"
+require "yaml"
+
+
+CONFIG_FILE = "#{ENV['HOME']}/.byline_rc"
+
+
+def connect
+  require "models/byline"
+
+  config = YAML::load(File.read(CONFIG_FILE))
+  puts config.inspect
+  server, id, key = config["simpledb_server"], config["simpledb_key_id"], config["simpledb_key"] 
+  puts server, id, key
+
+  @connection ||= SimpleRecord.establish_connection(id, key, :connection_mode => :single, :server => server)
+end
+
+
+if ARGV.length == 0
+  puts "byline <email>"
+  exit
+end
+
+
+if ARGV.length == 1
+  byline = Gravatar.find_by_email(ARGV[0])
+  puts byline.name || byline.display_name
+  puts byline.about_me
+  exit
+end
+
+
+case ARGV[0] 
+when "add"
+  name = ARGV[1].split("<")[0].strip
+  email = ARGV[1].split("<")[-1].split(">")[0].strip
+
+  connect
+  byline = Byline.new
+  byline.name = name
+  byline.email = email
+  byline.save
+when "find"
+  connect
+  byline = Byline.find_by_email(ARGV[1])
+  puts
+  puts "#{byline.id}   #{byline.attributes["name"][0]} <#{byline.attributes["email"][0]}>"
+  puts byline.bio
+  puts byline.photo_url(256)
+when "destroy"
+  connect
+  id = ARGV[1]
+  byline = Byline.find(id)
+  byline.destroy
+when "all"
+  connect
+  records = Byline.find(:all)
+  puts records.inspect
+  records.each do |r|
+    puts r.id
+  end
+when "destroy_all"
+  connect
+  Byline.destroy_all
+when "login"
+  server, id, key = ARGV[1..3]
+  config = {}
+  config["simpledb_server"] = server
+  config["simpledb_key_id"] = id
+  config["simpledb_key"] = key
+  File.open(CONFIG_FILE, "w") { |f| f.write config.to_yaml }
+else
+  puts "Unkown command: " + ARGV[0]
+end
