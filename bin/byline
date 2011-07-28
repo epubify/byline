@@ -24,8 +24,14 @@ def connect
 end
 
 
+def help
+  puts "byline add 'Username <email@examle.com>'"
+  puts "byline find 'email@examle.com'"
+  puts "byline destroy 'id'"
+end
+
 if ARGV.length == 0
-  puts "byline <email>"
+  help
   exit
 end
 
@@ -39,6 +45,8 @@ end
 
 
 case ARGV[0] 
+when "help"
+  help
 when "add"
   name = ARGV[1].split("<")[0].strip
   email = ARGV[1].split("<")[-1].split(">")[0].strip
