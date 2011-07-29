@@ -56,6 +56,15 @@ when "add"
   byline.name = name
   byline.email = email
   byline.save
+when "update"
+  name = ARGV[1].split("<")[0].strip
+  email = ARGV[1].split("<")[-1].split(">")[0].strip
+  nick = ARGV[2]
+  connect
+  byline = Byline.find_by_email(email)
+  byline.name = name
+  byline.nick = nick
+  byline.save
 when "find"
   connect
   byline = Byline.find_by_email(ARGV[1])

@@ -2,7 +2,7 @@ require 'active_model'
 require 'simple_record'
 
 class Byline < SimpleRecord::Base
-  has_strings :name, :email
+  has_strings :nick, :name, :email
 
 
   def bio
