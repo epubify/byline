@@ -24,12 +24,12 @@ class Gravatar
 
 
   def thumbnail_url
-    gravatar_profile && gravatar_profile['thumbnailUrl']
+    "http://gravatar.com/avatar/#{@gravatar_hash}.png?d=monsterid"
   end
 
 
   def photo_url size
-    gravatar_profile && "#{gravatar_profile['thumbnailUrl']}?size=#{size}"
+    "http://gravatar.com/avatar/#{@gravatar_hash}.png?size=#{size}"
   end
 
 
