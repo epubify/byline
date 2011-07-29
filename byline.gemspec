@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{byline}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Rune Myrland"]
@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
     "app/models/byline.rb",
     "app/models/gravatar.rb",
     "bin/byline",
+    "byline.gemspec",
     "lib/byline.rb",
     "spec/byline_spec.rb",
     "spec/spec_helper.rb"
