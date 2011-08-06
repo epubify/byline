@@ -7,6 +7,7 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require "models/gravatar"
 require "yaml"
+require "securerandom"
 
 
 CONFIG_FILE = "#{ENV['HOME']}/.byline_rc"
@@ -50,11 +51,12 @@ when "help"
 when "add"
   name = ARGV[1].split("<")[0].strip
   email = ARGV[1].split("<")[-1].split(">")[0].strip
-
+  nick = ARGV[2] || SecureRandom.hex(8)
   connect
   byline = Byline.new
   byline.name = name
   byline.email = email
+  byline.nick = nick
   byline.save
 when "update"
   name = ARGV[1].split("<")[0].strip
