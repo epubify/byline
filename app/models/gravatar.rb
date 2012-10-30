@@ -1,11 +1,10 @@
 require 'httparty'
+require 'restclient'
 require 'digest/md5'
-
+require 'json'
 
 class Gravatar
   class GravatarException < StandardError; end
-
-  include HTTParty
 
   def self.find_by_email email
     self.new(email)
@@ -50,11 +49,14 @@ class Gravatar
 
 private
   def get_gravatar_profile gravatar_hash
-    res = self.class.get "http://gravatar.com/#{gravatar_hash}.json"
-    case res.response
-    when Net::HTTPOK
-      res.parsed_response["entry"][0]
-    when Net::HTTPNotFound
+    url = "http://nb.gravatar.com/#{gravatar_hash}.json"
+    res = RestClient.get(url)
+
+    case res.code
+    when 200 # Net::HTTPOK
+      json = JSON.parse(res.body)
+      json && json['entry'] && json['entry'][0] || nil
+    when 404 #Net::HTTPNotFound
       nil
     else
       raise res.inspect
