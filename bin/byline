@@ -26,9 +26,13 @@ end
 
 
 def help
-  puts "byline add 'Username <email@examle.com>'"
+  pubs "byline help"
+  pubs "byline all"
+  puts "byline add 'Username <email@examle.com>' Nick"
+  puts "byline update 'Username <email@examle.com>' Nick"
   puts "byline find 'email@examle.com'"
   puts "byline destroy 'id'"
+  pubs "byline destroy_all"
 end
 
 if ARGV.length == 0
@@ -37,12 +41,6 @@ if ARGV.length == 0
 end
 
 
-if ARGV.length == 1
-  byline = Gravatar.find_by_email(ARGV[0])
-  puts byline.name || byline.display_name
-  puts byline.about_me
-  exit
-end
 
 
 case ARGV[0] 
@@ -71,7 +69,7 @@ when "find"
   connect
   byline = Byline.find_by_email(ARGV[1])
   puts
-  puts "#{byline.id}   #{byline.attributes["name"][0]} <#{byline.attributes["email"][0]}>"
+  puts "#{byline.id}  #{byline.attributes["name"][0]} <#{byline.attributes["email"][0]}> (@#{byline.nick})"
   puts byline.bio
   puts byline.photo_url(256)
 when "destroy"
@@ -84,7 +82,7 @@ when "all"
   records = Byline.find(:all)
   puts records.inspect
   records.each do |r|
-    puts r.id
+    puts "#{r.id} #{r.name} <#{r.email}> (@#{r.nick})"
   end
 when "destroy_all"
   connect
@@ -96,6 +94,10 @@ when "login"
   config["simpledb_key_id"] = id
   config["simpledb_key"] = key
   File.open(CONFIG_FILE, "w") { |f| f.write config.to_yaml }
+when "gravatar"
+  byline = Gravatar.find_by_email(ARGV[1])
+  puts byline.name || byline.display_name
+  puts byline.about_me
 else
   puts "Unkown command: " + ARGV[0]
 end
