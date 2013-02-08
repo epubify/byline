@@ -5,7 +5,8 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'app'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
-require "models/gravatar"
+require "models/byline/profile"
+require "models/byline/gravatar"
 require "yaml"
 require "securerandom"
 
@@ -14,14 +15,13 @@ CONFIG_FILE = "#{ENV['HOME']}/.byline_rc"
 
 
 def connect
-  require "models/byline"
+  require "models/byline/byline"
 
   config = YAML::load(File.read(CONFIG_FILE))
-  puts config.inspect
   server, id, key = config["simpledb_server"], config["simpledb_key_id"], config["simpledb_key"] 
-  puts server, id, key
 
   @connection ||= SimpleRecord.establish_connection(id, key, :connection_mode => :single, :server => server)
+rescue
 end
 
 
@@ -51,42 +51,45 @@ when "add"
   email = ARGV[1].split("<")[-1].split(">")[0].strip
   nick = ARGV[2] || SecureRandom.hex(8)
   connect
-  byline = Byline.new
+  byline = Byline::Byline.new
   byline.name = name
   byline.email = email
   byline.nick = nick
+  byline.update_gravatar_hash
   byline.save
 when "update"
   name = ARGV[1].split("<")[0].strip
   email = ARGV[1].split("<")[-1].split(">")[0].strip
   nick = ARGV[2]
   connect
-  byline = Byline.find_by_email(email)
+  byline = Byline::Byline.find_by_email(email)
   byline.name = name
   byline.nick = nick
+  byline.update_gravatar_hash
   byline.save
 when "find"
   connect
-  byline = Byline.find_by_email(ARGV[1])
+  profile = Byline::Profile.new( { :email => ARGV[1] } )
+  #byline = Byline::Byline.find_by_email(ARGV[1])
   puts
-  puts "#{byline.id}  #{byline.attributes["name"][0]} <#{byline.attributes["email"][0]}> (@#{byline.nick})"
-  puts byline.bio
-  puts byline.photo_url(256)
+  #puts "#{byline.id}  #{byline.attributes["name"][0]} <#{byline.attributes["email"][0]}> (@#{byline.nick})"
+  puts "#{profile.id} q#{profile.gravatar_hash}  #{profile.name} <#{profile.email}> (@#{profile.nick})"
+  #puts byline.bio
+  #puts byline.photo_url(256)
 when "destroy"
   connect
   id = ARGV[1]
-  byline = Byline.find(id)
+  byline = Byline::Byline.find(id)
   byline.destroy
 when "all"
   connect
-  records = Byline.find(:all)
-  puts records.inspect
+  records = Byline::Byline.find(:all)
   records.each do |r|
-    puts "#{r.id} #{r.name} <#{r.email}> (@#{r.nick})"
+    puts "#{r.gravatar_hash} #{r.name} <#{r.email}> (@#{r.nick})"
   end
 when "destroy_all"
   connect
-  Byline.destroy_all
+  Byline::Byline.destroy_all
 when "login"
   server, id, key = ARGV[1..3]
   config = {}
@@ -95,9 +98,10 @@ when "login"
   config["simpledb_key"] = key
   File.open(CONFIG_FILE, "w") { |f| f.write config.to_yaml }
 when "gravatar"
-  byline = Gravatar.find_by_email(ARGV[1])
+  byline = Byline.Gravatar.find_by_email(ARGV[1])
   puts byline.name || byline.display_name
   puts byline.about_me
+  # puts byline.inspect
 else
   puts "Unkown command: " + ARGV[0]
 end
